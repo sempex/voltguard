@@ -3,6 +3,8 @@ package bot
 import (
 	"fmt"
 	"log"
+	"os"
+	"voltguard/hue"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -16,6 +18,9 @@ var (
 )
 
 func interactionCreate(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+	hueUsername := os.Getenv("HUE_USERNAME")
+	hueBridgeIp := os.Getenv("HUE_BRIDGE_IP")
+	bridge := hue.Connect(hueUsername, hueBridgeIp)
 	fmt.Println("I've got an Interaction")
 	// Ignore all interactions from Bots
 	if interaction.Type == discordgo.InteractionApplicationCommand {
@@ -31,6 +36,16 @@ func interactionCreate(session *discordgo.Session, interaction *discordgo.Intera
 				},
 			}
 			_ = session.InteractionRespond(interaction.Interaction, response)
+		case "light":
+			go func() {
+				response := &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: hue.LogLights(bridge),
+					},
+				}
+				_ = session.InteractionRespond(interaction.Interaction, response)
+			}()
 		}
 
 	}
@@ -56,9 +71,13 @@ func Run() {
 			Name:        "hello",
 			Description: "Basic",
 		},
+		{
+			Name:        "light",
+			Description: "Turn The lights Off",
+		},
 	}
 
-	_, err = discord.ApplicationCommandCreate(discord.State.User.ID, DiscordGuildId, commands[0])
+	_, err = discord.ApplicationCommandCreate(discord.State.User.ID, DiscordGuildId, commands[1])
 	if err != nil {
 		log.Fatal(err)
 	}
