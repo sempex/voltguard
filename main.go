@@ -25,6 +25,8 @@ func main() {
 	// Connect To Philips Hue Bridge
 	hue.HueBridgeIp = hueBridgeIp
 	hue.HueUsername = hueUsername
+	bridge := hue.Connect()
+	go hue.LogLights(bridge)
 	// Start the Discord Bot
 	bot.DiscordBotToken = discordBotToken
 	bot.DiscordAppId = discordAppId
