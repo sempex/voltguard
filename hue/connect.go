@@ -12,7 +12,7 @@ func Connect(HueUsername string, HueBridgeIp string) *huego.Bridge {
 	return bridge
 }
 
-func LogLights(bridge *huego.Bridge) string {
+func LightsOff(bridge *huego.Bridge) string {
 	lights, err := bridge.GetLights()
 
 	if err != nil {
@@ -21,6 +21,19 @@ func LogLights(bridge *huego.Bridge) string {
 	for i := 0; i < len(lights); i++ {
 		lights[i].Off()
 		fmt.Println("Turned Off Light: ", lights[i])
+	}
+	return "toggeld all lights :)"
+}
+
+func LightsOn(bridge *huego.Bridge) string {
+	lights, err := bridge.GetLights()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	for i := 0; i < len(lights); i++ {
+		lights[i].On()
+		fmt.Println("Turned On Light: ", lights[i])
 	}
 	return "toggeld all lights :)"
 }

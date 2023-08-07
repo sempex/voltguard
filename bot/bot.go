@@ -36,12 +36,22 @@ func interactionCreate(session *discordgo.Session, interaction *discordgo.Intera
 				},
 			}
 			_ = session.InteractionRespond(interaction.Interaction, response)
-		case "light":
+		case "lightoff":
 			go func() {
 				response := &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
-						Content: hue.LogLights(bridge),
+						Content: hue.LightsOff(bridge),
+					},
+				}
+				_ = session.InteractionRespond(interaction.Interaction, response)
+			}()
+		case "lighton":
+			go func() {
+				response := &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: hue.LightsOn(bridge),
 					},
 				}
 				_ = session.InteractionRespond(interaction.Interaction, response)
@@ -72,15 +82,23 @@ func Run() {
 			Description: "Basic",
 		},
 		{
-			Name:        "light",
+			Name:        "lightoff",
 			Description: "Turn The lights Off",
+		},
+		{
+			Name:        "lighton",
+			Description: "Turn on The Lights",
 		},
 	}
 
-	_, err = discord.ApplicationCommandCreate(discord.State.User.ID, DiscordGuildId, commands[1])
-	if err != nil {
-		log.Fatal(err)
-	}
+	go func() {
+		for i := 0; i < len(commands); i++ {
+			_, err = discord.ApplicationCommandCreate(discord.State.User.ID, DiscordGuildId, commands[i])
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}()
 
 	fmt.Println("VoltGuard is now running. Press Ctrl+C to exit.")
 	select {}
